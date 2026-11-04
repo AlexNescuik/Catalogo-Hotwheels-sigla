@@ -56,6 +56,14 @@
     .lightbox img { width:min(92vw,1000px); max-height:80vh; object-fit:contain; background:#fff; border-radius:.75rem; box-shadow:0 20px 60px rgba(0,0,0,.6); }
     .lb-close { position:absolute; top:1rem; right:1rem; width:44px; height:44px; border-radius:9999px; background:#fff; color:#111; font-size:28px; line-height:1; font-weight:700; }
     #lb-cap { color:#fff; font-weight:600; text-align:center; }
+    /* Fotos múltiples */
+    .car-btn { position:absolute; top:50%; transform:translateY(-50%); z-index:2; width:32px; height:32px; border-radius:9999px; background:rgba(255,255,255,.85); color:#111; font-size:22px; line-height:1; font-weight:700; display:grid; place-items:center; box-shadow:0 2px 6px rgba(0,0,0,.35); }
+    .car-prev { left:.5rem; } .car-next { right:.5rem; }
+    .car-dots { position:absolute; bottom:.5rem; left:0; right:0; display:flex; justify-content:center; gap:6px; pointer-events:none; }
+    .car-dots span { width:8px; height:8px; border-radius:9999px; background:rgba(255,255,255,.55); box-shadow:0 0 0 1px rgba(0,0,0,.35); }
+    .car-dots span.on { background:#D42F41; }
+    .lb-nav { display:none; position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:9999px; background:#fff; color:#111; font-size:30px; line-height:1; font-weight:700; place-items:center; }
+    .lightbox.multi .lb-nav { display:grid; } .lb-prev { left:1rem; } .lb-next { right:1rem; }
     @media (prefers-reduced-motion:reduce) { *,*:before,*:after { transition-duration:.01ms!important; } }
   </style>
   <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
@@ -70,6 +78,7 @@
     const CONFIG = {
       whatsapp: '522215299783',
       store: 'Sigla',
+      autoplayMs: 0,              // 0 = fotos solo con flechas · pon 4000 para que cambien solas cada 4 segundos
       sheetCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS0XtaRdt0JB1YCTAlIYEQD1E8xjWly60xZY10Ci-Xw2cRjR3jhzgSvFeZbrNhYBJb_-4ehyEeJYT2F/pub?output=csv'   // Google Sheet publicado como CSV (ahí cambias estatus, cantidad y precio)
     };
     const PRODUCTS = [
@@ -126,10 +135,10 @@
       {"sku": "THEM-12", "name": "68 Corvette - Gas Monkey Garage", "cat": "Themed", "cond": "Buena", "qty": 1, "price": 50, "status": "Disponible"},
       {"sku": "VIN-01", "name": "Aston Martin 1963 BB5", "cat": "Vintage", "cond": "Buena", "qty": 1, "price": 50, "status": "Disponible"}
     ];
-    ];
   </script>
   <!-- Fotos incrustadas (una por SKU) -->
 <script>
+  // Para 2 fotos: "MAIN-01": ["./img/MAIN-01.jpg", "./img/MAIN-01-2.jpg"],   (con 1 sola foto se queda como texto normal)
   const IMG = {
     "MAIN-01": "./img/MAIN-01.jpg",
     "MAIN-02": "./img/MAIN-02.jpg",
@@ -239,7 +248,9 @@
   <!-- Ventana de zoom -->
   <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Foto ampliada">
    <button type="button" class="lb-close" aria-label="Cerrar">×</button>
+   <button type="button" class="lb-nav lb-prev" data-dir="-1" aria-label="Foto anterior">‹</button>
    <img id="lb-img" alt="">
+   <button type="button" class="lb-nav lb-next" data-dir="1" aria-label="Foto siguiente">›</button>
    <p id="lb-cap"></p>
   </div>
 
@@ -251,6 +262,10 @@
     const topCat = p => p.cat.split('/')[0].trim();
     const find = sku => PRODUCTS.find(p => p.sku === sku);
     const cart = new Map();
+    const idx = new Map();                                   // foto que se está viendo por SKU
+    const photos = sku => [].concat(IMG[sku] || []);         // texto o lista -> siempre lista
+    const ctrls = sku => { const n = photos(sku).length, i = idx.get(sku) || 0;
+      return n < 2 ? '' : `<button type="button" class="car-btn car-prev" data-dir="-1" aria-label="Foto anterior">‹</button><button type="button" class="car-btn car-next" data-dir="1" aria-label="Foto siguiente">›</button><div class="car-dots" aria-hidden="true">${photos(sku).map((_, k) => `<span class="${k === i ? 'on' : ''}"></span>`).join('')}</div>`; };
     let current = 'all';
 
     function buildFilters() {
@@ -267,7 +282,7 @@
         a.hidden = current !== 'all' && a.dataset.cat !== current;
         const cond = p.cond && p.cond !== 'Buena' ? `<p class="t t-desc mt-2 text-sm">Empaque: ${esc(p.cond)}</p>` : '';
         const left = ok && p.qty > 1 ? `<p class="t t-desc mt-1 text-xs">Disponibles: ${p.qty}</p>` : '';
-        a.innerHTML = `<div class="relative"><img class="product-photo w-full object-cover" loading="lazy" decoding="async" src="${IMG[p.sku] || ''}" alt="${esc(p.name)}"><div class="sold-badge"><span>AGOTADO</span></div><button type="button" class="zoom-btn" data-sku="${p.sku}" aria-label="Ampliar foto de ${esc(p.name)}"><img src="./Icons/Lupa.png" alt="" onerror="this.replaceWith(document.createTextNode('🔍'))"></button></div>
+        a.innerHTML = `<div class="relative"><img class="product-photo w-full object-cover" loading="lazy" decoding="async" src="${photos(p.sku)[idx.get(p.sku) || 0] || ''}" alt="${esc(p.name)}"><div class="sold-badge"><span>AGOTADO</span></div>${ctrls(p.sku)}<button type="button" class="zoom-btn" data-sku="${p.sku}" aria-label="Ampliar foto de ${esc(p.name)}"><img src="./Icons/Lupa.png" alt="" onerror="this.replaceWith(document.createTextNode('🔍'))"></button></div>
           <div class="p-5"><span class="t t-tag uppercase tracking-widest font-bold text-[11px]">${esc(p.cat)}</span>
           <h3 class="t t-name font-bold mt-2 text-xl">${esc(p.name)}</h3>${cond}${left}
           <div class="flex items-center justify-between gap-3 mt-5"><strong class="t t-price text-xl">${money(p.price)}</strong>
@@ -365,24 +380,57 @@
       } catch (err) { /* si falla, se queda con los datos incluidos arriba */ }
     }
 
-    // Zoom de fotos (ventana emergente)
-    const lb = $('lightbox'); let lbOpener = null;
+    // Zoom de fotos (ventana emergente) + cambio entre fotos
+    const lb = $('lightbox'); let lbOpener = null, lbSku = null;
+    function setPhoto(sku, i) {
+      const list = photos(sku); if (list.length < 2) return;
+      i = (i + list.length) % list.length; idx.set(sku, i);
+      const card = document.querySelector(`.product-card[data-sku="${sku}"]`);
+      if (card) { card.querySelector('.product-photo').src = list[i]; card.querySelectorAll('.car-dots span').forEach((d, k) => d.classList.toggle('on', k === i)); }
+      if (!lb.hidden && lbSku === sku) showZoom();
+    }
+    function showZoom() {
+      const p = find(lbSku), list = photos(lbSku), i = idx.get(lbSku) || 0;
+      $('lb-img').src = list[i] || ''; $('lb-img').alt = p.name;
+      $('lb-cap').textContent = list.length > 1 ? `${p.name} (${i + 1}/${list.length})` : p.name;
+      lb.classList.toggle('multi', list.length > 1);
+    }
     function openZoom(sku, opener) {
-      const p = find(sku); if (!p) return;
-      lbOpener = opener; $('lb-img').src = IMG[sku] || ''; $('lb-img').alt = p.name; $('lb-cap').textContent = p.name;
+      if (!find(sku)) return;
+      lbOpener = opener; lbSku = sku; showZoom();
       lb.hidden = false; document.body.style.overflow = 'hidden'; lb.querySelector('.lb-close').focus();
     }
     function closeZoom() {
-      lb.hidden = true; document.body.style.overflow = ''; $('lb-img').removeAttribute('src');
+      lb.hidden = true; lbSku = null; document.body.style.overflow = ''; $('lb-img').removeAttribute('src');
       if (lbOpener) lbOpener.focus();
     }
-    $('grid').addEventListener('click', e => { const z = e.target.closest('.zoom-btn'); if (z) openZoom(z.dataset.sku, z); });
-    lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('.lb-close')) closeZoom(); });
+    $('grid').addEventListener('click', e => {
+      const z = e.target.closest('.zoom-btn'), c = e.target.closest('.car-btn');
+      if (z) openZoom(z.dataset.sku, z);
+      else if (c) { const sku = c.closest('article').dataset.sku; setPhoto(sku, (idx.get(sku) || 0) + Number(c.dataset.dir)); }
+    });
+    lb.addEventListener('click', e => {
+      const n = e.target.closest('.lb-nav');
+      if (n) setPhoto(lbSku, (idx.get(lbSku) || 0) + Number(n.dataset.dir));
+      else if (e.target === lb || e.target.closest('.lb-close')) closeZoom();
+    });
     document.addEventListener('keydown', e => {
       if (lb.hidden) return;
       if (e.key === 'Escape') closeZoom();
+      else if (e.key === 'ArrowRight') setPhoto(lbSku, (idx.get(lbSku) || 0) + 1);
+      else if (e.key === 'ArrowLeft') setPhoto(lbSku, (idx.get(lbSku) || 0) - 1);
       else if (e.key === 'Tab') { e.preventDefault(); lb.querySelector('.lb-close').focus(); }
     });
+    // Cambio automático (opcional): se pausa con el mouse encima, con el zoom abierto o si el sistema pide menos movimiento
+    if (CONFIG.autoplayMs > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setInterval(() => {
+        if (!lb.hidden || document.hidden) return;
+        document.querySelectorAll('.product-card:not([hidden])').forEach(c => {
+          const sku = c.dataset.sku;
+          if (photos(sku).length > 1 && !c.matches(':hover') && !c.contains(document.activeElement)) setPhoto(sku, (idx.get(sku) || 0) + 1);
+        });
+      }, CONFIG.autoplayMs);
+    }
 
     buildFilters(); buildCards(); update(); sync();
     if (window.lucide) lucide.createIcons();
