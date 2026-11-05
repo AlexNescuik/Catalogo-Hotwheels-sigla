@@ -79,7 +79,7 @@
     const CONFIG = {
       whatsapp: '522215299783',
       store: 'Sigla',
-      autoplayMs: 0,              // 0 = fotos solo con flechas · pon 4000 para que cambien solas cada 4 segundos
+      autoplayMs: 4000,           
       sheetCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS0XtaRdt0JB1YCTAlIYEQD1E8xjWly60xZY10Ci-Xw2cRjR3jhzgSvFeZbrNhYBJb_-4ehyEeJYT2F/pub?output=csv'   // Google Sheet publicado como CSV (ahí cambias estatus, cantidad y precio)
     };
     const PRODUCTS = [
@@ -143,7 +143,7 @@
     // marcar el SKU correspondiente como Agotado (o bajarle la Cantidad) en el Google Sheet,
     // igual que haces con cualquier pieza suelta.
     const PROMOS = [
-      { id: 'promo-twintags', title: 'Combo 2 Twin Tags', items: [{ sku: 'MAIN-33', qty: 1 }, { sku: 'MAIN-34', qty: 1 }], price: 100, note: 'Blanco + Rojo' },
+      { id: 'promo-twintags', title: 'Combo 2 Twin Tags', items: [{ sku: 'MAIN-33', qty: 1 }, { sku: 'MAIN-34', qty: 1 }], price: 120, note: 'Blanco + Rojo' },
       { id: 'promo-purple', title: 'Combo 2 Tooned Purple Passion', items: [{ sku: 'MAIN-38', qty: 2 }], price: 100 }
       // Para dar de alta una oferta nueva, agrega otra línea así y poniendo qué piezas y precio lleva.
     ];
