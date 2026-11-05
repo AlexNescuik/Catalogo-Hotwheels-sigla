@@ -79,7 +79,7 @@
     const CONFIG = {
       whatsapp: '522215299783',
       store: 'Sigla',
-      autoplayMs: 4000,             
+      autoplayMs: 0,              // 0 = fotos solo con flechas · pon 4000 para que cambien solas cada 4 segundos
       sheetCsv: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS0XtaRdt0JB1YCTAlIYEQD1E8xjWly60xZY10Ci-Xw2cRjR3jhzgSvFeZbrNhYBJb_-4ehyEeJYT2F/pub?output=csv'   // Google Sheet publicado como CSV (ahí cambias estatus, cantidad y precio)
     };
     const PRODUCTS = [
@@ -118,7 +118,7 @@
       {"sku": "MAIN-35", "name": "Super Twin Mill", "cat": "Mainline", "cond": "Defecto de Fábrica", "qty": 1, "price": 65, "status": "Disponible"},
       {"sku": "MAIN-36", "name": "68 Lotus Type 49", "cat": "Mainline", "cond": "Buena", "qty": 1, "price": 65, "status": "Disponible"},
       {"sku": "MAIN-37", "name": "Austin Mini Cooper S", "cat": "Mainline", "cond": "Buena", "qty": 1, "price": 65, "status": "Disponible"},
-      {"sku": "MAIN-38", "name": "Tooned Purple Passion", "cat": "Mainline", "cond": "Buena", "qty": 2, "price": 65, "status": "Disponible"},
+      {"sku": "MAIN-38", "name": "Tooned Purple Passion", "cat": "Mainline", "cond": "Buena", "qty": 1, "price": 65, "status": "Disponible"},
       {"sku": "TH-01", "name": "Mod rod", "cat": "Treasure Hunt", "cond": "Tarjeta con daño en la pestaña", "qty": 1, "price": 60, "status": "Disponible"},
       {"sku": "TH-02", "name": "Raijin Express Rojo", "cat": "Treasure Hunt", "cond": "Buena", "qty": 1, "price": 80, "status": "Disponible"},
       {"sku": "TH-03", "name": "71 Mustang Funny Car", "cat": "Treasure Hunt", "cond": "Buena", "qty": 1, "price": 70, "status": "Disponible"},
@@ -145,10 +145,11 @@
     const PROMOS = [
       { id: 'promo-twintags', title: 'Combo 2 Twin Tags', items: [{ sku: 'MAIN-33', qty: 1 }, { sku: 'MAIN-34', qty: 1 }], price: 100, note: 'Blanco + Rojo' },
       { id: 'promo-purple', title: 'Combo 2 Tooned Purple Passion', items: [{ sku: 'MAIN-38', qty: 2 }], price: 100 }
-      // Para dar de alta una oferta nueva, agrega otra línea así y dime qué piezas y precio lleva.
+      // Para dar de alta una oferta nueva, agrega otra línea así y poniendo qué piezas y precio lleva.
     ];
   </script>
 <script>
+  // Para 2 fotos: "MAIN-01": ["./img/MAIN-01.jpg", "./img/MAIN-01-2.jpg"],   (con 1 sola foto se queda como texto normal)
   const IMG = {
     "MAIN-01": "./img/MAIN-01.jpg",
     "MAIN-02": "./img/MAIN-02.jpg",
@@ -189,18 +190,18 @@
     "TH-01": "./img/TH-01.png",
     "TH-02": "./img/TH-02.jpg",
     "TH-03": "./img/TH-03.jpg",
-    "THEM-01": "img/THEM-01.jpg",
-    "THEM-02": "img/THEM-02.jpg",
-    "THEM-03": "img/THEM-03.jpg",
-    "THEM-04": "img/THEM-04.jpg",
-    "THEM-05": "img/THEM-05.jpg",
-    "THEM-06": "img/THEM-06.jpg",
-    "THEM-07": "img/THEM-07.jpg",
-    "THEM-08": "img/THEM-08.jpg",
-    "THEM-09": "img/THEM-09.jpg",
-    "THEM-10": "img/THEM-10.jpg",
-    "THEM-11": "img/THEM-11.jpg",
-    "THEM-12": "img/THEM-12.jpg",
+    "THEM-01": "./img/THEM-01.jpg",
+    "THEM-02": "./img/THEM-02.jpg",
+    "THEM-03": "./img/THEM-03.jpg",
+    "THEM-04": "./img/THEM-04.jpg",
+    "THEM-05": "./img/THEM-05.jpg",
+    "THEM-06": "./img/THEM-06.jpg",
+    "THEM-07": "./img/THEM-07.jpg",
+    "THEM-08": "./img/THEM-08.jpg",
+    "THEM-09": "./img/THEM-09.jpg",
+    "THEM-10": "./img/THEM-10.jpg",
+    "THEM-11": "./img/THEM-11.jpg",
+    "THEM-12": "./img/THEM-12.jpg",
     "VIN-01": "./img/VIN-01.jpg",
   };
 </script> <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
@@ -227,7 +228,7 @@
     <div class="max-w-7xl mx-auto px-5 sm:px-8 py-8 md:py-10">
      <p class="uppercase tracking-[.18em] font-bold mb-1" style="color:#F1D74D;font-size:12px">Por tiempo limitado</p>
      <h2 class="hero-title mb-6" style="color:#fff;font-weight:800;font-size:30px">🔥 OFERTONES</h2>
-     <div id="promo-grid" class="grid sm:grid-cols-2 gap-5"></div>
+     <div id="promo-grid" class="grid gap-5" style="grid-template-columns:repeat(auto-fill,minmax(240px,280px))"></div>
     </div>
    </section>
    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 md:py-16">
@@ -259,7 +260,7 @@
    </div>
   </main>
   <footer class="w-full py-7" style="background:#4251ae">
-   <p class="max-w-7xl mx-auto px-5 sm:px-8" style="color:#fff;font-size:14px">Catálogo de autos Hot Wheels · Sigla · Precios en pesos mexicanos.</p>
+   <p class="max-w-7xl mx-auto px-5 sm:px-8" style="color:#fff;font-size:14px">Catálogo de autos Hot Wheels · Sigla · Página hecha por @alex.nescuik</p>
   </footer>
 
   <!-- Ventana de zoom -->
@@ -283,9 +284,9 @@
     const findPromo = id => PROMOS.find(x => x.id === id);
     const promoReady = promo => promo.items.every(({sku, qty}) => { const p = find(sku); return p && avail(p) && p.qty >= qty; });
     const reservedByPromo = sku => [...cartPromos].some(id => findPromo(id).items.some(it => it.sku === sku));
-    const promoBlocked = promo => promo.items.some(({sku}) => cart.has(sku));  
-    const idx = new Map();                                   
-    const photos = sku => [].concat(IMG[sku] || []);
+    const promoBlocked = promo => promo.items.some(({sku}) => cart.has(sku));   // ya tiene esa pieza suelta en el carrito
+    const idx = new Map();                                   // foto que se está viendo por SKU
+    const photos = sku => [].concat(IMG[sku] || []);         // texto o lista -> siempre lista
     const ctrls = sku => { const n = photos(sku).length, i = idx.get(sku) || 0;
       return n < 2 ? '' : `<button type="button" class="car-btn car-prev" data-dir="-1" aria-label="Foto anterior">‹</button><button type="button" class="car-btn car-next" data-dir="1" aria-label="Foto siguiente">›</button><div class="car-dots" aria-hidden="true">${photos(sku).map((_, k) => `<span class="${k === i ? 'on' : ''}"></span>`).join('')}</div>`; };
     let current = 'all';
@@ -315,12 +316,12 @@
 
     function buildPromos() {
       const wrap = $('promos'), grid = $('promo-grid'), visible = PROMOS.filter(promoReady);
-      wrap.hidden = visible.length === 0;                
+      wrap.hidden = visible.length === 0;                 // sin ofertas activas, toda la sección desaparece
       grid.innerHTML = visible.map(promo => {
         const pics = promo.items.map(({sku}) => photos(sku)[0]).filter(Boolean);
         const names = promo.items.map(({sku, qty}) => `${qty > 1 ? qty + '× ' : ''}${find(sku).name}`).join(' + ');
         return `<article class="product-card rounded-2xl overflow-hidden border border-slate-200" data-promo="${promo.id}">
-          <div class="relative flex">${pics.map(src => `<img class="product-photo w-full object-cover" style="aspect-ratio:1/1" loading="lazy" src="${src}" alt="">`).join('')}</div>
+          <div class="product-photo relative flex">${pics.map(src => `<img class="w-full h-full object-cover" loading="lazy" src="${src}" alt="">`).join('')}</div>
           <div class="p-5"><span class="t t-tag uppercase tracking-widest font-bold text-[11px]">Combo</span>
           <h3 class="t t-name font-bold mt-2 text-xl">${esc(promo.title)}</h3>
           <p class="t t-desc mt-2 text-sm">${esc(names)}${promo.note ? ' · ' + esc(promo.note) : ''}</p>
